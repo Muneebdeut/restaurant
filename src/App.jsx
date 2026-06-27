@@ -186,10 +186,6 @@ function StepB({ d, s }) {
       </FieldBox>
       <FieldBox label="Monthly Revenue Range">
         <SInput value={d.monthlyRevenue} onChange={u("monthlyRevenue")} options={[
-          { value: "Under $2,000", label: "Under $2,000 / month" },
-          { value: "$2,000–$5,000", label: "$2,000 – $5,000 / month" },
-          { value: "$5,000–$15,000", label: "$5,000 – $15,000 / month" },
-          { value: "$15,000+", label: "$15,000+ / month" },
           { value: "Under 500k PKR", label: "Under 500,000 PKR / month" },
           { value: "500k–1.5m PKR", label: "500,000 – 1,500,000 PKR / month" },
           { value: "1.5m–3m PKR", label: "1,500,000 – 3,000,000 PKR / month" },
@@ -235,15 +231,25 @@ function StepC({ d, s }) {
 }
 
 function StepD({ d, s }) {
+  const u = k => v => s({ ...d, [k]: v });
   return (
-    <FieldBox label="What are your biggest challenges?" required hint="Select all that apply">
-      <CheckGroup
-        options={["Missed Calls", "Slow Responses", "Lost Orders", "Customer Complaints",
-          "High Staff Cost", "Reservation Management", "Menu Questions"]}
-        selected={d.challenges}
-        onChange={v => s({ ...d, challenges: v })}
-      />
-    </FieldBox>
+    <>
+      <FieldBox label="What are your biggest challenges?" required hint="Select all that apply">
+        <CheckGroup
+          options={["Missed Calls", "Slow Responses", "Lost Orders", "Customer Complaints",
+            "High Staff Cost", "Reservation Management", "Menu Questions", "Other"]}
+          selected={d.challenges}
+          onChange={v => s({ ...d, challenges: v })}
+        />
+      </FieldBox>
+      {d.challenges.includes("Other") && (
+        <div style={{ marginTop: "-12px", marginBottom: "12px" }}>
+          <FieldBox label="Specify Other Challenge(s)" required>
+            <TInput value={d.customChallenge || ""} onChange={u("customChallenge")} placeholder="e.g. Bad delivery service, inventory errors, etc." />
+          </FieldBox>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -448,7 +454,7 @@ const INIT = {
   restaurantName: "", ownerName: "", phone: "", whatsapp: "", email: "",
   city: "", branches: "", restaurantType: "", customRestaurantType: "",
   dailyOrders: "", monthlyRevenue: "", customMonthlyRevenue: "", employees: "", workingHours: "",
-  contactChannels: [], challenges: [],
+  contactChannels: [], challenges: [], customChallenge: "",
   budget: "", customBudget: "", languages: [], integrations: [], menuType: "",
 };
 
@@ -460,7 +466,7 @@ function FormPage({ onSubmit, onBack }) {
     if (step === 0) return d.restaurantName && d.ownerName && d.phone && d.email && d.city && d.restaurantType && (d.restaurantType !== "Other" || d.customRestaurantType);
     if (step === 1) return !!d.dailyOrders && (d.monthlyRevenue !== "Custom" || d.customMonthlyRevenue);
     if (step === 2) return d.contactChannels.length > 0;
-    if (step === 3) return d.challenges.length > 0;
+    if (step === 3) return d.challenges.length > 0 && (!d.challenges.includes("Other") || d.customChallenge);
     if (step === 4) return d.budget && (d.budget !== "Custom" || d.customBudget);
     return true;
   };
@@ -1088,6 +1094,9 @@ export default function App() {
     }
     if (data.budget === "Custom" && data.customBudget) {
       finalData.budget = data.customBudget;
+    }
+    if (data.challenges.includes("Other") && data.customChallenge) {
+      finalData.challenges = data.challenges.map(x => x === "Other" ? data.customChallenge : x);
     }
 
     setFormData(finalData);
