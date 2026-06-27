@@ -68,8 +68,12 @@ function SInput({ value, onChange, options, placeholder = "-- Select --" }) {
   return (
     <select className="input-3d" value={value} onChange={e => onChange(e.target.value)}
       style={{ ...baseInput, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
-      <option value="">{placeholder}</option>
-      {options.map(o => <option key={o.value || o} value={o.value || o}>{o.label || o}</option>)}
+      <option value="" style={{ background: T.surface, color: T.white }}>{placeholder}</option>
+      {options.map(o => (
+        <option key={o.value || o} value={o.value || o} style={{ background: T.surface, color: T.white }}>
+          {o.label || o}
+        </option>
+      ))}
     </select>
   );
 }
