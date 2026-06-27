@@ -259,17 +259,17 @@ function StepE({ d, s }) {
     <>
       <FieldBox label="Monthly Budget for AI Automation" required>
         <SInput value={d.budget} onChange={u("budget")} options={[
-          { value: "Under $50/mo", label: "Under $50 / month" },
-          { value: "$50–$100/mo", label: "$50 – $100 / month" },
-          { value: "$100–$300/mo", label: "$100 – $300 / month" },
-          { value: "$300+/mo", label: "$300+ / month" },
+          { value: "Under 15,000 PKR/mo", label: "Under 15,000 PKR / month" },
+          { value: "15,000–30,000 PKR/mo", label: "15,000 – 30,000 PKR / month" },
+          { value: "30,000–80,000 PKR/mo", label: "30,000 – 80,000 PKR / month" },
+          { value: "80,000+ PKR/mo", label: "80,000+ PKR / month" },
           { value: "Custom", label: "Custom Budget (Enter manually)..." },
         ]} />
       </FieldBox>
       {d.budget === "Custom" && (
         <div style={{ marginTop: "-12px", marginBottom: "12px" }}>
           <FieldBox label="Enter Custom Monthly Budget" required>
-            <TInput value={d.customBudget || ""} onChange={u("customBudget")} placeholder="e.g. 50,000 PKR or $150" />
+            <TInput value={d.customBudget || ""} onChange={u("customBudget")} placeholder="e.g. 25,000 PKR or 60,000 PKR" />
           </FieldBox>
         </div>
       )}
@@ -1133,7 +1133,7 @@ Respond ONLY with valid JSON. No markdown backticks, no preamble, no explanation
     "A third opportunity"
   ],
   "complexityLevel": "Low/Medium/High",
-  "estimatedCostRange": "$X – $Y one-time setup",
+  "estimatedCostRange": "PKR X – PKR Y one-time setup (amounts in Pakistani Rupees)",
   "aiReadinessScore": 75,
   "leadCategory": "Hot/Warm/Cold",
   "reasoning": "2-3 sentences explaining the score: what makes them a good or poor fit, their biggest opportunity, and what's holding them back if anything.",
@@ -1142,9 +1142,11 @@ Respond ONLY with valid JSON. No markdown backticks, no preamble, no explanation
 }
 
 Scoring guide:
-- Hot (75–100): Revenue >$5k/mo OR orders >100/day, budget >$100/mo, 3+ pain points, uses WhatsApp/calls, multiple branches get bonus
+- Hot (75–100): Revenue >1,400,000 PKR/mo OR orders >100/day, budget >30,000 PKR/mo, 3+ pain points, uses WhatsApp/calls, multiple branches get bonus
 - Warm (50–74): Moderate operations, some automation potential, willing to invest
-- Cold (<50): Very small operation, <$50/mo budget, minimal contact channels
+- Cold (<50): Very small operation, <15,000 PKR/mo budget, minimal contact channels
+
+IMPORTANT: All monetary values must be in Pakistani Rupees (PKR). Use PKR for estimatedCostRange, e.g. "PKR 140,000 – PKR 420,000 one-time setup".
 
 Choose agentType based on primary channel: WhatsApp dominant → WhatsApp agent. Calls dominant → AI Call Handler. Multiple channels → Omni-channel agent. Multi-branch → Enterprise AI System.`;
 
@@ -1214,7 +1216,7 @@ Choose agentType based on primary channel: WhatsApp dominant → WhatsApp agent.
           "Handle peak-hour surge without additional staff costs",
         ],
         complexityLevel: "Medium",
-        estimatedCostRange: "$500 – $1,500 one-time setup",
+        estimatedCostRange: "PKR 140,000 – PKR 420,000 one-time setup",
         aiReadinessScore: 70,
         leadCategory: "Warm",
         reasoning: "Based on your restaurant profile, there is solid potential for WhatsApp-based AI automation. Your customer communication patterns and operational challenges align well with our standard restaurant AI solution. A WhatsApp agent would provide immediate ROI.",
