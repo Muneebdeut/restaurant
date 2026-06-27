@@ -161,6 +161,13 @@ function StepA({ d, s }) {
           { value: "Other", label: "🍴 Other" },
         ]} />
       </FieldBox>
+      {d.restaurantType === "Other" && (
+        <div style={{ gridColumn: "1 / -1", marginTop: "-12px", marginBottom: "12px" }}>
+          <FieldBox label="Specify Restaurant Type" required>
+            <TInput value={d.customRestaurantType || ""} onChange={u("customRestaurantType")} placeholder="e.g. Cloud Kitchen, Food Truck, etc." />
+          </FieldBox>
+        </div>
+      )}
     </div>
   );
 }
@@ -179,12 +186,24 @@ function StepB({ d, s }) {
       </FieldBox>
       <FieldBox label="Monthly Revenue Range">
         <SInput value={d.monthlyRevenue} onChange={u("monthlyRevenue")} options={[
-          { value: "Under $2,000", label: "Under $2,000/month" },
-          { value: "$2,000–$5,000", label: "$2,000 – $5,000/month" },
-          { value: "$5,000–$15,000", label: "$5,000 – $15,000/month" },
-          { value: "$15,000+", label: "$15,000+/month" },
+          { value: "Under $2,000", label: "Under $2,000 / month" },
+          { value: "$2,000–$5,000", label: "$2,000 – $5,000 / month" },
+          { value: "$5,000–$15,000", label: "$5,000 – $15,000 / month" },
+          { value: "$15,000+", label: "$15,000+ / month" },
+          { value: "Under 500k PKR", label: "Under 500,000 PKR / month" },
+          { value: "500k–1.5m PKR", label: "500,000 – 1,500,000 PKR / month" },
+          { value: "1.5m–3m PKR", label: "1,500,000 – 3,000,000 PKR / month" },
+          { value: "3m+ PKR", label: "3,000,000+ PKR / month" },
+          { value: "Custom", label: "Custom Amount (Enter manually)..." },
         ]} />
       </FieldBox>
+      {d.monthlyRevenue === "Custom" && (
+        <div style={{ marginTop: "-12px", marginBottom: "12px" }}>
+          <FieldBox label="Enter Custom Monthly Revenue" required>
+            <TInput value={d.customMonthlyRevenue || ""} onChange={u("customMonthlyRevenue")} placeholder="e.g. 750,000 PKR or $4,000" />
+          </FieldBox>
+        </div>
+      )}
       <FieldBox label="Number of Employees">
         <SInput value={d.employees} onChange={u("employees")} options={[
           { value: "1–5", label: "1–5 Employees" }, { value: "6–15", label: "6–15 Employees" },
@@ -238,8 +257,16 @@ function StepE({ d, s }) {
           { value: "$50–$100/mo", label: "$50 – $100 / month" },
           { value: "$100–$300/mo", label: "$100 – $300 / month" },
           { value: "$300+/mo", label: "$300+ / month" },
+          { value: "Custom", label: "Custom Budget (Enter manually)..." },
         ]} />
       </FieldBox>
+      {d.budget === "Custom" && (
+        <div style={{ marginTop: "-12px", marginBottom: "12px" }}>
+          <FieldBox label="Enter Custom Monthly Budget" required>
+            <TInput value={d.customBudget || ""} onChange={u("customBudget")} placeholder="e.g. 50,000 PKR or $150" />
+          </FieldBox>
+        </div>
+      )}
       <FieldBox label="AI Languages Needed" hint="Select all that apply">
         <CheckGroup
           options={["Urdu", "English", "Arabic", "Mixed (Urdu + English)"]}
@@ -419,10 +446,10 @@ const STEPS_META = [
 
 const INIT = {
   restaurantName: "", ownerName: "", phone: "", whatsapp: "", email: "",
-  city: "", branches: "", restaurantType: "",
-  dailyOrders: "", monthlyRevenue: "", employees: "", workingHours: "",
+  city: "", branches: "", restaurantType: "", customRestaurantType: "",
+  dailyOrders: "", monthlyRevenue: "", customMonthlyRevenue: "", employees: "", workingHours: "",
   contactChannels: [], challenges: [],
-  budget: "", languages: [], integrations: [], menuType: "",
+  budget: "", customBudget: "", languages: [], integrations: [], menuType: "",
 };
 
 function FormPage({ onSubmit, onBack }) {
@@ -430,11 +457,11 @@ function FormPage({ onSubmit, onBack }) {
   const [d, setD] = useState(INIT);
 
   const valid = () => {
-    if (step === 0) return d.restaurantName && d.ownerName && d.phone && d.email && d.city && d.restaurantType;
-    if (step === 1) return !!d.dailyOrders;
+    if (step === 0) return d.restaurantName && d.ownerName && d.phone && d.email && d.city && d.restaurantType && (d.restaurantType !== "Other" || d.customRestaurantType);
+    if (step === 1) return !!d.dailyOrders && (d.monthlyRevenue !== "Custom" || d.customMonthlyRevenue);
     if (step === 2) return d.contactChannels.length > 0;
     if (step === 3) return d.challenges.length > 0;
-    if (step === 4) return !!d.budget;
+    if (step === 4) return d.budget && (d.budget !== "Custom" || d.customBudget);
     return true;
   };
 
@@ -1052,7 +1079,18 @@ export default function App() {
   }, []);
 
   const handleSubmit = async (data) => {
-    setFormData(data);
+    const finalData = { ...data };
+    if (data.restaurantType === "Other" && data.customRestaurantType) {
+      finalData.restaurantType = data.customRestaurantType;
+    }
+    if (data.monthlyRevenue === "Custom" && data.customMonthlyRevenue) {
+      finalData.monthlyRevenue = data.customMonthlyRevenue;
+    }
+    if (data.budget === "Custom" && data.customBudget) {
+      finalData.budget = data.customBudget;
+    }
+
+    setFormData(finalData);
     setPage(PAGES.LOADING);
 
     const prompt = `You are an expert AI automation consultant specializing in restaurant businesses in Pakistan and the Middle East.
@@ -1060,7 +1098,7 @@ export default function App() {
 Analyze this restaurant data and provide a comprehensive AI solution recommendation.
 
 Restaurant Data:
-${JSON.stringify(data, null, 2)}
+${JSON.stringify(finalData, null, 2)}
 
 Respond ONLY with valid JSON. No markdown backticks, no preamble, no explanation — just raw JSON:
 
@@ -1129,7 +1167,7 @@ Choose agentType based on primary channel: WhatsApp dominant → WhatsApp agent.
       const lead = {
         leadId: `L${Date.now()}`,
         date: new Date().toLocaleDateString("en-PK"),
-        ...data,
+        ...finalData,
         agentType: result.agentType,
         aiReadinessScore: result.aiReadinessScore,
         leadCategory: result.leadCategory,
@@ -1147,7 +1185,7 @@ Choose agentType based on primary channel: WhatsApp dominant → WhatsApp agent.
       // Graceful fallback
       const fallback = {
         agentType: "WhatsApp AI Ordering & Support Agent",
-        agentDescription: `A smart WhatsApp automation system tailored for ${data.restaurantType || "your restaurant"} in ${data.city || "your city"}. It handles incoming orders, answers menu questions, manages reservations, and responds to customer inquiries 24/7 — reducing your staff workload while improving customer satisfaction significantly.`,
+        agentDescription: `A smart WhatsApp automation system tailored for ${finalData.restaurantType || "your restaurant"} in ${finalData.city || "your city"}. It handles incoming orders, answers menu questions, manages reservations, and responds to customer inquiries 24/7 — reducing your staff workload while improving customer satisfaction significantly.`,
         features: ["Automated Order Taking", "Menu Query Handling", "Reservation Management", "Order Confirmation & Updates", "Upselling Suggestions", "Multi-language Support"],
         expectedBenefits: [
           { metric: "Response Time", improvement: "40% Faster" },
@@ -1172,7 +1210,7 @@ Choose agentType based on primary channel: WhatsApp dominant → WhatsApp agent.
       };
 
       try {
-        const lead = { leadId: `L${Date.now()}`, date: new Date().toLocaleDateString("en-PK"), ...data, agentType: fallback.agentType, aiReadinessScore: fallback.aiReadinessScore, leadCategory: fallback.leadCategory };
+        const lead = { leadId: `L${Date.now()}`, date: new Date().toLocaleDateString("en-PK"), ...finalData, agentType: fallback.agentType, aiReadinessScore: fallback.aiReadinessScore, leadCategory: fallback.leadCategory };
         const existing = localStorage.getItem("restaurant_leads");
         const all = existing ? JSON.parse(existing) : [];
         localStorage.setItem("restaurant_leads", JSON.stringify([...all, lead]));
